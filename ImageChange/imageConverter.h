@@ -18,7 +18,8 @@ using namespace std;
 #define ID_CONVERT_BUTTON 1001  // ボタンIDの定義
 #define ID_BACK_BUTTON 1002     // 戻るボタンのID定義
 
-class ImageConverter {
+class ImageConverter 
+{
 public:
     ImageConverter(HWND parent);
     void Show();

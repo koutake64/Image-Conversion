@@ -26,7 +26,8 @@ ImageConverter::ImageConverter(HWND parent)
         this
     );
 
-    if (hwnd == nullptr) {
+    if (hwnd == nullptr)
+    {
         return;
     }
 
@@ -36,14 +37,16 @@ ImageConverter::ImageConverter(HWND parent)
     CreateButtons();  // ボタンの作成を呼び出し
 }
 
-void ImageConverter::Show() {
+void ImageConverter::Show()
+{
     ShowWindow(hwnd, SW_SHOW);
 }
 
-void ImageConverter::CreateButtons() {
+void ImageConverter::CreateButtons()
+{
     CreateWindow(
         L"BUTTON",
-        L"変換画像を選択",
+        L"ファイル選択",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
         10,
         10,
@@ -70,28 +73,34 @@ void ImageConverter::CreateButtons() {
     );
 }
 
-std::vector<uint8_t> LoadFile(const wchar_t* filePath) {
+std::vector<uint8_t> LoadFile(const wchar_t* filePath)
+{
     std::ifstream file(filePath, std::ios::binary);
-    if (!file) {
+    if (!file)
+    {
         return {};
     }
     return std::vector<uint8_t>((std::istreambuf_iterator<char>(file)),
         std::istreambuf_iterator<char>());
 }
 
-void ImageConverter::ConvertImage(const wchar_t* inputFilePath, const wchar_t* outputFilePath, CLSID outputClsid) {
+void ImageConverter::ConvertImage(const wchar_t* inputFilePath, const wchar_t* outputFilePath, CLSID outputClsid) 
+{
     std::wstring input(inputFilePath);
-    if (input.find(L".webp") != std::wstring::npos) {
+    if (input.find(L".webp") != std::wstring::npos) 
+    {
         auto fileData = LoadFile(inputFilePath);
-        if (fileData.empty()) {
-            MessageBox(NULL, L"WebP 画像の読み込みに失敗しました。", L"Error", MB_OK);
+        if (fileData.empty()) 
+        {
+            MessageBox(NULL, L"Failed to load WebP image.", L"Error", MB_OK);
             return;
         }
 
         int width = 0, height = 0;
         uint8_t* data = WebPDecodeRGBA(fileData.data(), fileData.size(), &width, &height);
-        if (!data) {
-            MessageBox(NULL, L"WebP 画像のデコードに失敗しました。", L"Error", MB_OK);
+        if (!data)
+        {
+            MessageBox(NULL, L"Failed to decode WebP image.", L"Error", MB_OK);
             return;
         }
 
@@ -102,46 +111,57 @@ void ImageConverter::ConvertImage(const wchar_t* inputFilePath, const wchar_t* o
         memcpy(bitmapData.Scan0, data, width * height * 4);
         bitmap->UnlockBits(&bitmapData);
 
-        if (bitmap->GetLastStatus() == Ok) {
+        if (bitmap->GetLastStatus() == Ok)
+        {
             bitmap->Save(outputFilePath, &outputClsid, NULL);
         }
-        else {
-            MessageBox(NULL, L"画像の保存に失敗しました。", L"Error", MB_OK);
+        else 
+        {
+            MessageBox(NULL, L"Failed to save image.", L"Error", MB_OK);
         }
 
         delete bitmap;
         std::free(data);  // メモリを解放する
     }
-    else {
+    else
+    {
         Image* image = new Image(inputFilePath);
-        if (image->GetLastStatus() == Ok) {
+        if (image->GetLastStatus() == Ok) 
+        {
             image->Save(outputFilePath, &outputClsid, NULL);
         }
-        else {
-            MessageBox(NULL, L"画像の読み込みに失敗しました。.", L"Error", MB_OK);
+        else 
+        {
+           MessageBox(NULL, L"Failed to load image.", L"Error", MB_OK);
         }
         delete image;
     }
 }
 
-LRESULT CALLBACK ImageConverter::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK ImageConverter::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
     ImageConverter* pThis = nullptr;
 
-    if (uMsg == WM_NCCREATE) {
+    if (uMsg == WM_NCCREATE) 
+    {
         CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
         pThis = (ImageConverter*)pCreate->lpCreateParams;
         SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)pThis);
         pThis->hwnd = hwnd;
     }
-    else {
+    else 
+    {
         pThis = (ImageConverter*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
     }
 
-    if (pThis) {
-        switch (uMsg) {
+    if (pThis)
+    {
+        switch (uMsg) 
+        {
         case WM_COMMAND:
-            if (LOWORD(wParam) == ID_CONVERT_BUTTON) {
-               // MessageBox(hwnd, L"Convert Button Clicked", L"Debug", MB_OK); // デバッグメッセージ
+            if (LOWORD(wParam) == ID_CONVERT_BUTTON)
+            {
+                //MessageBox(hwnd, L"Convert Button Clicked", L"Debug", MB_OK); // デバッグメッセージ
                 // ここに画像変換処理を追加
                 OPENFILENAME ofn = { 0 };
                 wchar_t szFile[260];
@@ -154,7 +174,8 @@ LRESULT CALLBACK ImageConverter::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
                 ofn.nFilterIndex = 1;
                 ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
-                if (GetOpenFileName(&ofn)) {
+                if (GetOpenFileName(&ofn)) 
+                {
                     wchar_t saveFile[260];
                     ZeroMemory(&saveFile, sizeof(saveFile));
                     OPENFILENAME ofnSave = { 0 };
@@ -166,44 +187,54 @@ LRESULT CALLBACK ImageConverter::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
                     ofnSave.nFilterIndex = 1;
                     ofnSave.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
 
-                    if (GetSaveFileName(&ofnSave)) {
+                    if (GetSaveFileName(&ofnSave))
+                    {
                         CLSID clsid;
                         const wchar_t* extension = nullptr;
                         HRESULT hr = S_OK;
-                        if (ofnSave.nFilterIndex == 1) {
+                        if (ofnSave.nFilterIndex == 1) 
+                        {
                             hr = CLSIDFromString(L"{557CF401-1A04-11D3-9A73-0000F81EF32E}", &clsid); // JPEG
                             extension = L".jpg";
                         }
-                        else if (ofnSave.nFilterIndex == 2) {
+                        else if (ofnSave.nFilterIndex == 2) 
+                        {
                             hr = CLSIDFromString(L"{557CF406-1A04-11D3-9A73-0000F81EF32E}", &clsid); // PNG
                             extension = L".png";
                         }
-                        else if (ofnSave.nFilterIndex == 3) {
+                        else if (ofnSave.nFilterIndex == 3) 
+                        {
                             hr = CLSIDFromString(L"{557CF400-1A04-11D3-9A73-0000F81EF32E}", &clsid); // BMP
                             extension = L".bmp";
                         }
-                        else if (ofnSave.nFilterIndex == 4) {
+                        else if (ofnSave.nFilterIndex == 4) 
+                        {
                             hr = CLSIDFromString(L"{6FDDC324-4E03-4BFE-B185-3D77768DC904}", &clsid); // WebP
                             extension = L".webp";
                         }
-                        else if (ofnSave.nFilterIndex == 5) {
+                        else if (ofnSave.nFilterIndex == 5) 
+                        {
                             hr = CLSIDFromString(L"{557CF401-1A04-11D3-9A73-0000F81EF32E}", &clsid); // ICO
                             extension = L".ico";
                         }
 
-                        if (SUCCEEDED(hr)) {
-                            if (!PathFindExtension(saveFile) || lstrcmp(PathFindExtension(saveFile), L"") == 0) {
+                        if (SUCCEEDED(hr)) 
+                        {
+                            if (!PathFindExtension(saveFile) || lstrcmp(PathFindExtension(saveFile), L"") == 0)
+                            {
                                 lstrcat(saveFile, extension);
                             }
                             pThis->ConvertImage(ofn.lpstrFile, ofnSave.lpstrFile, clsid);
                         }
-                        else {
+                        else 
+                        {
                             MessageBox(hwnd, L"Failed to get CLSID.", L"Error", MB_OK);
                         }
                     }
                 }
             }
-            else if (LOWORD(wParam) == ID_BACK_BUTTON) {
+            else if (LOWORD(wParam) == ID_BACK_BUTTON) 
+            {
                // MessageBox(hwnd, L"Back Button Clicked", L"Debug", MB_OK); // デバッグメッセージ
                 ShowWindow(pThis->hwnd, SW_HIDE);  // 現在のウィンドウを非表示にする
                 ShowWindow(pThis->parent, SW_SHOW);  // メインウィンドウを表示する
@@ -218,7 +249,8 @@ LRESULT CALLBACK ImageConverter::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
         }
     }
-    else {
+    else
+    {
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
     return 0;

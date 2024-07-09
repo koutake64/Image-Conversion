@@ -134,14 +134,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AudioConverter.cpp" />
     <ClCompile Include="imageConverter.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mainWindow.cpp" />
+    <ClCompile Include="Utils.cpp" />
+    <ClCompile Include="VideoConverter.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AudioConverter.h" />
     <ClInclude Include="imageConverter.h" />
     <ClInclude Include="mainWindow.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Utils.h" />
+    <ClInclude Include="VideoConverter.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon2.ico" />

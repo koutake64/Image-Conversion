@@ -1,10 +1,13 @@
 #include "MainWindow.h"
 #include "ImageConverter.h"
-#include "resource.h"  // 追加
+#include "AudioConverter.h"
+#include "VideoConverter.h"
+#include "resource.h"
 
 const wchar_t MainWindow::CLASS_NAME[] = L"MainWindowClass";
 
-MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow) {
+MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow) 
+{
     this->hInstance = hInstance;
 
     WNDCLASS wc = {};
@@ -18,7 +21,7 @@ MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow) {
     hwnd = CreateWindowEx(
         0,
         CLASS_NAME,
-        L"Take's labo Application",
+        L"Take's Labo Application",
         WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
         nullptr,
@@ -27,7 +30,8 @@ MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow) {
         this
     );
 
-    if (hwnd == nullptr) {
+    if (hwnd == nullptr) 
+    {
         return;
     }
 
@@ -35,7 +39,10 @@ MainWindow::MainWindow(HINSTANCE hInstance, int nCmdShow) {
     CreateButtons();
 }
 
-void MainWindow::CreateButtons() {
+//===== ボタン作成 =====
+void MainWindow::CreateButtons() 
+{
+    //--- 画像変換
     CreateWindow(
         L"BUTTON",
         L"画像変換",
@@ -49,10 +56,42 @@ void MainWindow::CreateButtons() {
         hInstance,
         nullptr
     );
+
+    //--- 音源変換
+    CreateWindow(
+        L"BUTTON",
+        L"音源変換",
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        10,
+        50,
+        150,
+        30,
+        hwnd,
+        (HMENU)ID_AUDIO_CONVERT_BUTTON,
+        hInstance,
+        nullptr
+    );
+
+    CreateWindow(
+        L"BUTTON",
+        L"動画変換",
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
+        10,
+        90,
+        150,
+        30,
+        hwnd,
+        (HMENU)ID_VIDEO_CONVERT_BUTTON,
+        hInstance,
+        nullptr
+    );
+
 }
 
-void MainWindow::OnButtonClicked(WPARAM wParam) {
-    switch (LOWORD(wParam)) {
+void MainWindow::OnButtonClicked(WPARAM wParam) 
+{
+    switch (LOWORD(wParam))
+    {
     case ID_CONVERT_BUTTON:
     {
         ImageConverter* converter = new ImageConverter(hwnd);  // new で作成しポインタを保持
@@ -60,24 +99,45 @@ void MainWindow::OnButtonClicked(WPARAM wParam) {
         ShowWindow(hwnd, SW_HIDE);  // メインウィンドウを非表示にする
     }
     break;
+
+    case ID_AUDIO_CONVERT_BUTTON:  // 追加
+    {
+        AudioConverter* converter = new AudioConverter(hwnd);
+        converter->Show();
+        ShowWindow(hwnd, SW_HIDE);  // メインウィンドウを非表示にする
+    }
+    break;
+
+    case ID_VIDEO_CONVERT_BUTTON:
+    {
+        VideoConverter* converter = new VideoConverter(hwnd);
+        converter->SetText(L"設定した名前が反映されないバグ 戻るを押すと正常に動画が生成されます。");
+        converter->Show();
+        ShowWindow(hwnd, SW_HIDE);
+    }
     }
 }
 
-LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
+{
     MainWindow* pThis = nullptr;
 
-    if (uMsg == WM_NCCREATE) {
+    if (uMsg == WM_NCCREATE)
+    {
         CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
         pThis = (MainWindow*)pCreate->lpCreateParams;
         SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)pThis);
         pThis->hwnd = hwnd;
     }
-    else {
+    else 
+    {
         pThis = (MainWindow*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
     }
 
-    if (pThis) {
-        switch (uMsg) {
+    if (pThis) 
+    {
+        switch (uMsg)
+        {
         case WM_COMMAND:
             pThis->OnButtonClicked(wParam);
             break;
@@ -90,7 +150,8 @@ LRESULT CALLBACK MainWindow::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPA
             return DefWindowProc(hwnd, uMsg, wParam, lParam);
         }
     }
-    else {
+    else
+    {
         return DefWindowProc(hwnd, uMsg, wParam, lParam);
     }
     return 0;
